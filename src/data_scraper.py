@@ -1,12 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
-import os
 import requests
 
 # Define IMDb Top 250 URL
@@ -20,30 +17,6 @@ def scrape_imdb_movies_with_selenium():
     driver.get(BASE_URL)
     time.sleep(3)  # Wait for the page to load
 
-    # Change the view type to "list-view-option-detailed"
-    try:
-        # Locate the "chart-layout-view-options" container
-        view_options = driver.find_element(By.CLASS_NAME, "chart-layout-view-options")
-        
-        # Find the button or dropdown for "list-view-option-detailed"
-        detailed_view_button = view_options.find_element(By.ID, "list-view-option-detailed")
-        
-        # Click the button to change the view
-        detailed_view_button.click()
-        time.sleep(2)  # Wait for the page to update
-    except Exception as e:
-        print(f"Failed to change view type: {e}")
-
-    # Scroll to the bottom of the page to load all content (if lazy-loaded)
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    while True:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)  # Wait for new content to load
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            break
-        last_height = new_height
-
     # Parse the fully loaded page with BeautifulSoup
     soup = BeautifulSoup(driver.page_source, "html.parser")
     driver.quit()  # Close the browser
@@ -52,12 +25,9 @@ def scrape_imdb_movies_with_selenium():
     movies_data = []
     movie_rows = soup.select(".ipc-metadata-list-summary-item")  # Updated selector for movie rows
 
-    
     if not movie_rows:
         print("No movie data found. Check the HTML structure.")
         return None
-    
-    movies_data = []
     
     for movie in movie_rows:
         # Extract movie title
@@ -65,7 +35,7 @@ def scrape_imdb_movies_with_selenium():
         title = title_element.text.strip() if title_element else "Unknown"
         
         # Extract release year
-        year_element = movie.select(".sc-f30335b4-7 jhjEEd dli-title-metadata-item")
+        year_element = movie.select(".sc-f30335b4-7")
         year = year_element[0].text.strip() if year_element else "Unknown"
         
         # Extract IMDb rating
@@ -98,21 +68,15 @@ def scrape_imdb_movies_with_selenium():
                 box_office_element = movie_soup.select_one(".ipc-metadata-list__item:-soup-contains('Gross worldwide')")
                 box_office_revenue = box_office_element.text.strip().split(":")[-1] if box_office_element else "Unknown"
                 
-                # Extract lead actors (Avoid duplication)
-                stars_heading = movie_soup.select_one("span:contains('Stars')")  # Locate 'Stars' heading
-                print(stars_heading)
-                if stars_heading:
-                    # Find all sibling elements with the class for actor names
-                    actor_elements = stars_heading.find_next_siblings("span", class_="sc-d49a611d-2.iPIqIX")
-                    print(actor_elements)
-                    if actor_elements:
-                        lead_actors_set = {actor.text.strip() for actor in actor_elements}  # Use a set to avoid duplicates
+                # Extract lead actors (Updated method)
+                metadata_sections = movie_soup.find_all("li", class_="ipc-metadata-list__item")
+                for section in metadata_sections:
+                    if section.find(string="Stars"):
+                        actor_elements = section.find_all("a", href=lambda x: x and "/name/" in x)
+                        lead_actors_set = {actor.text.strip() for actor in actor_elements}
                         lead_actors = ", ".join(lead_actors_set) if lead_actors_set else "Unknown"
-                    else:
-                        lead_actors = "Unknown"
-                else:
-                    lead_actors = "Unknown"
-                    
+                        break
+        
         movies_data.append({
             "Title": title,
             "Year": year,
@@ -125,11 +89,6 @@ def scrape_imdb_movies_with_selenium():
 
     # Save to a DataFrame
     df = pd.DataFrame(movies_data)
-    df.shape  # (250, 3)
-    df.head()
-
-
-    # Save the data to a CSV file
     df.to_csv("imdb_top_movies.csv", index=False)
     print(f"Scraping complete. Data saved.")
 
