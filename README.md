@@ -34,22 +34,22 @@ This project performs exploratory data analysis (EDA) on top global movies from 
     
     mv path/to/chromedriver drivers/
 
-Project Structure
+## Project Structure
+```
+
 eda_global_movies/
 ├── data/
-│   ├── raw/
-│   └── processed/
+│   ├── imdb_top_movies_cleaned.csv
+│   └── imdb_top_movies.csv
 ├── notebooks/
-│   └── [eda_global_movies.ipynb](http://_vscodecontentref_/2)
+│   └── eda_global_movies.ipynb
 ├── src/
 │   ├── data_scraper.py
-│   ├── data_cleaner.py
-│   └── utils.py
-├── drivers/
-│   └── chromedriver
-├── [requirements.txt](http://_vscodecontentref_/3)
-└── [README.md](http://_vscodecontentref_/4)
+├── [requirements.txt]
+└── [README.md]
+```
 
+## Environment Requirements
 
 Requirements:
     pandas
