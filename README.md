@@ -16,7 +16,7 @@ This project performs exploratory data analysis (EDA) on top global movies from 
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/eda_global_movies.git
+   git clone https://github.com/j2damax/eda_top_us_song.git
    cd eda_global_movies
 
 
