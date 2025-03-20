@@ -50,6 +50,7 @@ eda_global_movies/
 ```
 
 ## Environment Requirements
+```
 
 Requirements:
     pandas
@@ -59,6 +60,7 @@ Requirements:
     webdriver-manager
     jupyter
 
+```
 Notes:
 Ensure that the ChromeDriver version matches your installed Chrome browser version.
 If you encounter issues with ChromeDriver, refer to the ChromeDriver Documentation for troubleshooting.
