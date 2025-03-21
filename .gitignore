@@ -185,3 +185,7 @@ Thumbs.db
 # Virtual Environment
 *.pyc
 *.pyo
+
+# Exclude the report folder
+report/
+report/**
